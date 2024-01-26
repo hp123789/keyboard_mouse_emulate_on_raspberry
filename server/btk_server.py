@@ -22,6 +22,36 @@ from bluetooth import *
 
 logging.basicConfig(level=logging.DEBUG)
 
+class Agent(dbus.service.Object):
+    """ 
+    BT Pairing agent
+    API: https://git.kernel.org/pub/scm/bluetooth/bluez.git/plain/doc/agent-api.txt 
+    examples: https://github.com/elsampsa/btdemo/blob/master/bt_studio.py 
+    """
+
+    @dbus.service.method('org.bluez.Agent1',
+                    in_signature='os', out_signature='')
+    def AuthorizeService(self, device, uuid):
+        logging.info(f"[plover_link] Successfully paired device: {device} using Secure Simple Pairing (SSP)")
+        return
+
+    @dbus.service.method('org.bluez.Agent1',
+                         in_signature='o', out_signature='')
+    def RequestAuthorization(self, device):
+        logging.info(f"[plover_link] Accepted RequestAuthorization from {device}")
+        return
+
+    @dbus.service.method('org.bluez.Agent1',
+                         in_signature='', out_signature='')
+    def Cancel(self):
+        logging.info("[plover_link] Cancel request received from BT client")
+        raise(BluezErrorCanceled)
+    
+    @dbus.service.method('org.bluez.Agent1',
+                in_signature='', out_signature='')
+    def Release(self):
+        self.logging("[plover_link] Connection released due to BT client request")
+        mainloop.quit()
 
 class BTKbDevice():
     # change these constants
@@ -40,6 +70,7 @@ class BTKbDevice():
         print("2. Setting up BT device")
         self.init_bt_device()
         self.init_bluez_profile()
+        self.register_bt_pairing_agent()
 
     # configure the bluetooth hardware device
     def init_bt_device(self):
@@ -66,6 +97,22 @@ class BTKbDevice():
         manager.RegisterProfile("/org/bluez/hci0", BTKbDevice.UUID, opts)
         print("6. Profile registered ")
         os.system("hciconfig hci0 class 0x0025C0")
+
+    def register_bt_pairing_agent(self):
+        """
+        Setup and register BT paring agent
+        """
+        capability = 'NoInputNoOutput'
+        manager = dbus.Interface(self.bus.get_object('org.bluez',
+                                                     '/org/bluez'),
+                                 'org.bluez.AgentManager1')
+        Agent(self.bus, BTKbDevice.AGENT_DBUS_PATH)
+
+        manager.RegisterAgent(BTKbDevice.AGENT_DBUS_PATH, capability)
+        #manager.UnregisterAgent(BTKbDevice.AGENT_DBUS_PATH, capability)
+        manager.RequestDefaultAgent(BTKbDevice.AGENT_DBUS_PATH)
+        self.bt_agent_running = True
+        logging.debug(f'[plover_link] Registered secure Bluez pairing agent with capability: {capability}')
 
     # read and return an sdp record from a file
     def read_sdp_service_record(self):
