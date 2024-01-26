@@ -56,7 +56,7 @@ class Agent(dbus.service.Object):
 class BTKbDevice():
     # change these constants
     MY_ADDRESS = "B8:27:EB:C5:B3:27"
-    MY_DEV_NAME = "ThanhLe_Keyboard_Mouse"
+    MY_DEV_NAME = "test_keyboard_nio"
 
     # define some constants
     P_CTRL = 17  # Service port - must match port configured in SDP record
