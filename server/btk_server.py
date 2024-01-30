@@ -102,17 +102,19 @@ class BTKbDevice():
         """
         Setup and register BT paring agent
         """
+        print("start")
         capability = 'NoInputNoOutput'
-        manager = dbus.Interface(self.bus.get_object('org.bluez',
+        bus = dbus.SystemBus()
+        manager = dbus.Interface(bus.get_object('org.bluez',
                                                      '/org/bluez'),
                                  'org.bluez.AgentManager1')
-        Agent(self.bus, BTKbDevice.AGENT_DBUS_PATH)
+        Agent(bus, '/org/bluez')
 
-        manager.RegisterAgent(BTKbDevice.AGENT_DBUS_PATH, capability)
-        #manager.UnregisterAgent(BTKbDevice.AGENT_DBUS_PATH, capability)
-        manager.RequestDefaultAgent(BTKbDevice.AGENT_DBUS_PATH)
-        self.bt_agent_running = True
+        manager.RegisterAgent('/org/bluez', capability)
+        #manager.UnregisterAgent('/org/bluez', capability)
+        manager.RequestDefaultAgent('/org/bluez')
         logging.debug(f'[plover_link] Registered secure Bluez pairing agent with capability: {capability}')
+        print("done")
 
     # read and return an sdp record from a file
     def read_sdp_service_record(self):
