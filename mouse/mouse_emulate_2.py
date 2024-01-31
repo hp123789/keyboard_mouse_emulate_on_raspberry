@@ -10,11 +10,6 @@ import numpy as np
 
 
 class MouseClient():
-	self.input_stream = "cursor_2d_commands"
-	self.discrete_input_stream = "decoded_gestures"
-	self.last_input_entry_seen = "$"
-	self.screen_height = 1080
-	self.r = redis.Redis('192.168.150.2')
 
 	def __init__(self):
 		super().__init__()
@@ -30,6 +25,11 @@ class MouseClient():
 			error(err)
 	
 	def run(self):
+		self.input_stream = "cursor_2d_commands"
+		self.discrete_input_stream = "decoded_gestures"
+		self.last_input_entry_seen = "$"
+		self.screen_height = 1080
+		self.r = redis.Redis('192.168.150.2')
 
 		last_input_entries = self.r.xrevrange(self.input_stream, count=1)
 		self.last_input_entry_seen = (
