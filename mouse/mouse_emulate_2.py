@@ -71,8 +71,22 @@ class MouseClient():
 				x_bgcoordinates = distance_bgcoordinates[0]
 				y_bgcoordinates = distance_bgcoordinates[1]
 
-				self.state[1] = x_bgcoordinates / self.screen_height
-				self.state[2] = y_bgcoordinates / self.screen_height
+				x_final = int(x_bgcoordinates * self.screen_height)
+				y_final = int(y_bgcoordinates * self.screen_height)
+
+				# if (x_final > 128): x_final = 128
+				# if (x_final < -128): x_final = -128
+				# if (y_final > 128): y_final = 128
+				# if (y_final < -128): x_final = -128
+
+				if (x_final < 0):
+					x_final = 256 + x_final
+
+				if (y_final < 0):
+					y_final = 256 + y_final
+
+				self.state[1] = int(x_final)
+				self.state[2] = int(y_final)
 
 				self.send_current()
 				
