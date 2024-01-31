@@ -104,6 +104,8 @@ class BtkStringClient():
             time.sleep(BtkStringClient.KEY_DELAY)
     
     def run(self):
+        last_entry_seen = "0"
+        trial_info_last_entry_seen = "0"
         while True:
 
             sentence = self.r.xread(
