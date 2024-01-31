@@ -10,11 +10,11 @@ import numpy as np
 
 
 class MouseClient():
-	input_stream = "cursor_2d_commands"
-	discrete_input_stream = "decoded_gestures"
-	last_input_entry_seen = "$"
-	screen_height = 1080
-	r = redis.Redis('192.168.150.2')
+	self.input_stream = "cursor_2d_commands"
+	self.discrete_input_stream = "decoded_gestures"
+	self.last_input_entry_seen = "$"
+	self.screen_height = 1080
+	self.r = redis.Redis('192.168.150.2')
 
 	def __init__(self):
 		super().__init__()
@@ -31,13 +31,13 @@ class MouseClient():
 	
 	def run(self):
 
-		last_input_entries = r.xrevrange(input_stream, count=1)
-		last_input_entry_seen = (
+		last_input_entries = self.r.xrevrange(self.input_stream, count=1)
+		self.last_input_entry_seen = (
 			last_input_entries[0][0] if len(last_input_entries) > 0 else "0-0"
 		)
 
-		last_discrete_input_entries = r.xrevrange(
-			discrete_input_stream, count=1
+		last_discrete_input_entries = self.r.xrevrange(
+			self.discrete_input_stream, count=1
 		)
 		last_discrete_input_entry_seen = (
 			last_discrete_input_entries[0][0]
@@ -47,10 +47,10 @@ class MouseClient():
 	
 		while True:
 			
-			read_result = r.xread(
+			read_result = self.r.xread(
                     {
-                        input_stream: last_input_entry_seen,
-                        discrete_input_stream: last_discrete_input_entry_seen,
+                        self.input_stream: self.last_input_entry_seen,
+                        self.discrete_input_stream: last_discrete_input_entry_seen,
                     }
                 )
 
@@ -59,10 +59,10 @@ class MouseClient():
 			}
 
 			for input_entry_id, input_entry_dict in read_result_dict.get(
-				input_stream, []
+				self.input_stream, []
 			):
 				# Save that we've now seen this entry.
-				last_input_entry_seen = input_entry_id
+				self.last_input_entry_seen = input_entry_id
 
 				# Input command received.
 				distance_bgcoordinates = np.frombuffer(
